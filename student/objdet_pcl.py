@@ -14,6 +14,8 @@
 import cv2
 import numpy as np
 import torch
+import zlib
+import open3d as o3d
 
 # add project directory to python path to enable relative imports
 import os
@@ -37,15 +39,28 @@ def show_pcl(pcl):
     #######
     print("student task ID_S1_EX2")
 
-    # step 1 : initialize open3d with key callback and create window
+    # # step 1 : initialize open3d with key callback and create window
+    # print(pcl.shape)
+    # vis = o3d.visualization.VisualizerWithKeyCallback()
+    # vis.create_window()
+    # # vis.register_key_callback(262, close_window)
+    # vis.register_key_callback(262, lambda vis: vis.close())
     
-    # step 2 : create instance of open3d point-cloud class
+    # # step 2 : create instance of open3d point-cloud class
+    pcd = o3d.geometry.PointCloud()
 
-    # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
+    # # step 3 : set points in pcd instance by converting the point-cloud into 3d vectors (using open3d function Vector3dVector)
+    pcd.points = o3d.utility.Vector3dVector(pcl[:,:3])
 
-    # step 4 : for the first frame, add the pcd instance to visualization using add_geometry; for all other frames, use update_geometry instead
+    # # step 4 : for the first frame, add the pcd instance to visualization using add_geometry; for all other frames, use update_geometry instead
+    # vis.add_geometry(pcd)
     
-    # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)
+    # # step 5 : visualize point cloud and keep window open until right-arrow is pressed (key-code 262)
+    # vis.run()
+
+    #pcd = o3d.geometry.PointCloud()
+    #pcd.points = o3d.utility.Vector3dVector(pcl[])
+    o3d.visualization.draw_geometries([pcd])
 
     #######
     ####### ID_S1_EX2 END #######     
@@ -59,19 +74,40 @@ def show_range_image(frame, lidar_name):
     print("student task ID_S1_EX1")
 
     # step 1 : extract lidar data and range image for the roof-mounted lidar
-    
+    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0]
+    ri = dataset_pb2.MatrixFloat()
+    ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))    
+    ri = np.array(ri.data).reshape(ri.shape.dims)
+    print(ri.shape)
     # step 2 : extract the range and the intensity channel from the range image
+    ri[ri<0] = 0
+    
+    ri_range = ri[:,:,0]
+    ri_inten = ri[:,:,1]
+    #ri_inten[ri_inten>1.0] = 1.0
     
     # step 3 : set values <0 to zero
     
     # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
-    
+    ri_range =  ri_range *  255/(np.amax(ri_range) - np.amin(ri_range))
+    img_range = ri_range.astype(np.uint8)
+    ang45 = int(img_range.shape[1]/8)
+    ang_mid = int(img_range.shape[1]/2) 
+    #img_range = img_range[:,ang_mid-ang45:ang_mid+ang45]
+    #cv2.imshow("range channel",img_range)
+    #cv2.waitKey(0)
     # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
+    ri_inten =  ri_inten * (np.amax(ri_inten)/2) * 255/(np.amax(ri_inten) - np.amin(ri_inten))
+    img_inten = ri_inten.astype(np.uint8)
+    ang45 = int(img_inten.shape[1]/8)
+    ang_mid = int(img_inten.shape[1]/2) 
+    #img_inten = img_inten[:,ang_mid-ang45:ang_mid+ang45]
+    #cv2.imshow("intensity channel",img_inten)
+    #cv2.waitKey(0)
     
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    
-    img_range_intensity = [] # remove after implementing all steps
-    #######
+    img_range_intensity = np.vstack((img_inten,img_range))
+
     ####### ID_S1_EX1 END #######     
     
     return img_range_intensity
@@ -94,19 +130,37 @@ def bev_from_pcl(lidar_pcl, configs):
     #######
     print("student task ID_S2_EX1")
 
-    ## step 1 :  compute bev-map discretization by dividing x-range by the bev-image height (see configs)
+    # remove lidar points outside detection area and with too low reflectivity
+    mask = np.where((lidar_pcl[:, 0] >= configs.lim_x[0]) & (lidar_pcl[:, 0] <= configs.lim_x[1]) &
+                    (lidar_pcl[:, 1] >= configs.lim_y[0]) & (lidar_pcl[:, 1] <= configs.lim_y[1]) &
+                    (lidar_pcl[:, 2] >= configs.lim_z[0]) & (lidar_pcl[:, 2] <= configs.lim_z[1]))
+    lidar_pcl = lidar_pcl[mask]
+    
+    # shift level of ground plane to avoid flipping from 0 to 255 for neighboring pixels
+    lidar_pcl[:, 2] = lidar_pcl[:, 2] - configs.lim_z[0]  
+    #show_pcl(lidar_pcl)
+    # convert sensor coordinates to bev-map coordinates (center is bottom-middle)
+    ####### ID_S2_EX1 START #######     
+    #######
+    print("student task ID_S2_EX1")
 
+
+    ## step 1 :  compute bev-map discretization by dividing x-range by the bev-image height (see configs)
+    
+    
     ## step 2 : create a copy of the lidar pcl and transform all metrix x-coordinates into bev-image coordinates    
+    lidar_pcl_cpy = np.copy(lidar_pcl)
+    lidar_pcl_cpy[:,0] = lidar_pcl_cpy[:,0]*configs.bev_height/(configs.lim_x[1] -configs.lim_x[0])
+    lidar_pcl_cpy[:,0] = np.int_(np.floor(lidar_pcl_cpy[:,0]))
 
     # step 3 : perform the same operation as in step 2 for the y-coordinates but make sure that no negative bev-coordinates occur
+    lidar_pcl_cpy[:,1] = np.floor(lidar_pcl_cpy[:,1]* (configs.bev_width/2) /configs.lim_y[1])  + (configs.bev_width+1)/2
+    lidar_pcl_cpy[:,1] = np.int_(np.floor(lidar_pcl_cpy[:,1]))
 
     # step 4 : visualize point-cloud using the function show_pcl from a previous task
-    
-    #######
-    ####### ID_S2_EX1 END #######     
-    
-    
-    # Compute intensity layer of the BEV map
+    show_pcl(lidar_pcl_cpy)
+    #show_pcl(lidar_pcl_cpy)
+
     ####### ID_S2_EX2 START #######     
     #######
     print("student task ID_S2_EX2")
