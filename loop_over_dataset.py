@@ -52,7 +52,7 @@ import misc.params as params
 data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
 # data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
 # data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
-show_only_frames = [0, 1] # show only frames in interval for debugging
+show_only_frames = [50, 150] # show only frames in interval for debugging
 
 ## Prepare Waymo Open Dataset file for loading
 data_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset', data_filename) # adjustable path in case this script is called from another working directory
@@ -67,7 +67,7 @@ configs_det = det.load_configs(model_name='darknet') # options are 'darknet', 'f
 model_det = det.create_model(configs_det)
 
 configs_det.use_labels_as_objects = False # True = use groundtruth labels as objects, False = use model-based detection
-
+configs_det.min_iou = 0.5
 ## Uncomment this setting to restrict the y-range in the final project
 # configs_det.lim_y = [-25, 25] 
 
@@ -80,10 +80,10 @@ camera = None # init camera sensor object
 np.random.seed(10) # make random values predictable
 
 ## Selective execution and visualization
-exec_detection = ['bev_from_pcl'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = [] # options are 'perform_tracking'
-exec_visualization = [] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
-exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
+exec_detection = ['bev_from_pcl', 'detect_objects','validate_object_labels', 'measure_detection_performance'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = ['pcl_from_rangeimage'] # options are 'perform_tracking'
+exec_visualization = ['show_detection_performance'] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization,)#'pcl_from_rangeimage', 'load_image'
 vis_pause_time = 0 # set pause time between frames in ms (0 = stop between frames until key is pressed)
 
 
@@ -147,7 +147,7 @@ while True:
                 detections = det.detect_objects(lidar_bev, model_det, configs_det)
             else:
                 print('loading detected objects from result file')
-                detections = load_object_from_file(results_fullpath, data_filename, 'detections_' + configs_det.arch + '_' + str(configs_det.conf_thresh), cnt_frame)
+                detections = load_object_from_file(results_fullpath, data_filename, 'detections_' + model + '_' + str(configs_det.conf_thresh), cnt_frame)
 
         ## Validate object labels
         if 'validate_object_labels' in exec_list:
@@ -163,7 +163,7 @@ while True:
             det_performance = eval.measure_detection_performance(detections, frame.laser_labels, valid_label_flags, configs_det.min_iou)     
         else:
             print('loading detection performance measures from file')
-            det_performance = load_object_from_file(results_fullpath, data_filename, 'det_performance_' + configs_det.arch + '_' + str(configs_det.conf_thresh), cnt_frame)   
+            det_performance = load_object_from_file(results_fullpath, data_filename, 'det_performance_' + model + '_' + str(configs_det.conf_thresh), cnt_frame)   
 
         det_performance_all.append(det_performance) # store all evaluation results in a list for performance assessment at the end
         
@@ -266,7 +266,7 @@ while True:
 
 ## Evaluate object detection performance
 if 'show_detection_performance' in exec_list:
-    eval.compute_performance_stats(det_performance_all, configs_det)
+    eval.compute_performance_stats(det_performance_all)
 
 ## Plot RMSE for all tracks
 if 'show_tracks' in exec_list:

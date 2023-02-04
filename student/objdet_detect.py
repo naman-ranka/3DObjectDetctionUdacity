@@ -29,6 +29,9 @@ from tools.objdet_models.resnet.utils.evaluation_utils import decode, post_proce
 from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
 from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
 
+from tools.objdet_models.resnet.utils.torch_utils import _sigmoid
+#from tools.objdet_models.resnet.utils.evaluation_utils import draw_predictions, convert_det_to_real_values
+
 
 # load model-related parameters into an edict
 def load_configs_model(model_name='darknet', configs=None):
@@ -61,6 +64,45 @@ def load_configs_model(model_name='darknet', configs=None):
         ####### ID_S3_EX1-3 START #######     
         #######
         print("student task ID_S3_EX1-3")
+        configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'resnet')
+        configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
+        configs.saved_fn = 'fpn_resnet_18'
+        configs.K = 50
+        configs.pretrained_path = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
+        configs.arch = 'fpn_resnet_18'
+        configs.batch_size = 4
+        configs.peak_thresh = 0.5
+        #configs.cfgfile = os.path.join(configs.model_path, 'config', 'complex_yolov4.cfg')
+        configs.conf_thresh = 0.5
+        configs.distributed = False
+        configs.img_size = 608
+        configs.nms_thresh = 0.4
+        configs.num_samples = None
+        configs.num_workers = 4
+        configs.pin_memory = True
+        configs.use_giou_loss = False
+
+        configs.input_size = (608, 608)
+        configs.hm_size = (152, 152)
+        configs.down_ratio = 4
+        configs.max_objects = 50
+
+        configs.imagenet_pretrained = False
+        configs.head_conv = 64
+        configs.num_classes = 3
+        configs.num_center_offset = 2
+        configs.num_z = 1
+        configs.num_dim = 3
+        configs.num_direction = 2
+
+        configs.heads = {
+        'hm_cen': configs.num_classes,
+        'cen_offset': configs.num_center_offset,
+        'direction': configs.num_direction,
+        'z_coor': configs.num_z,
+        'dim': configs.num_dim
+         }
+        configs.num_input_features = 4
 
         #######
         ####### ID_S3_EX1-3 END #######     
@@ -117,7 +159,15 @@ def create_model(configs):
         
         ####### ID_S3_EX1-4 START #######     
         #######
-        print("student task ID_S3_EX1-4")
+        try:
+            arch_parts = configs.arch.split('_')
+            num_layers = int(arch_parts[-1])
+        except:
+            raise ValueError
+        print('using ResNet architecture with feature pyramid')
+        model = fpn_resnet.get_pose_net(num_layers=num_layers, heads=configs.heads, head_conv=configs.head_conv,
+                                        imagenet_pretrained=configs.imagenet_pretrained)
+
 
         #######
         ####### ID_S3_EX1-4 END #######     
@@ -167,6 +217,18 @@ def detect_objects(input_bev_maps, model, configs):
             ####### ID_S3_EX1-5 START #######     
             #######
             print("student task ID_S3_EX1-5")
+            outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
+            outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
+            # detections size (batch_size, K, 10)
+            detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
+                                outputs['dim'], K=configs.K)
+            detections = detections.cpu().numpy().astype(np.float32)
+            detections = post_processing(detections, configs=configs)
+            detections = detections[0][1]
+            
+            #detections = detections[0]
+            print("detections...",detections)
+
 
             #######
             ####### ID_S3_EX1-5 END #######     
@@ -180,12 +242,27 @@ def detect_objects(input_bev_maps, model, configs):
     objects = [] 
 
     ## step 1 : check whether there are any detections
+    print("no of detections",len(detections))
+    if len(detections)>0:
 
-        ## step 2 : loop over all detections
+
+    ## step 2 : loop over all detections
         
-            ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
-        
-            ## step 4 : append the current object to the 'objects' array
+        for det in detections:
+            # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
+            _score, _x, _y, _z, _h, _w, _l, _yaw = det
+            det[1] = _y*configs.lim_x[1]/configs.bev_height
+            det[2] = _x*configs.lim_y[1]*2/configs.bev_width - configs.lim_y[1]
+            det[5] = _w*configs.lim_y[1]*2/configs.bev_width
+            det[6] = _l*configs.lim_x[1]/configs.bev_height
+            det[7] = -_yaw
+            print("det....",det)
+            objects.append(det)
+
+    ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
+
+    ## step 4 : append the current object to the 'objects' array
+
         
     #######
     ####### ID_S3_EX2 START #######   
