@@ -93,7 +93,7 @@ def show_range_image(frame, lidar_name):
     img_range = ri_range.astype(np.uint8)
     ang45 = int(img_range.shape[1]/8)
     ang_mid = int(img_range.shape[1]/2) 
-    #img_range = img_range[:,ang_mid-ang45:ang_mid+ang45]
+    img_range = img_range[:,ang_mid-2*ang45:ang_mid+2*ang45]
     #cv2.imshow("range channel",img_range)
     #cv2.waitKey(0)
     # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
@@ -101,12 +101,12 @@ def show_range_image(frame, lidar_name):
     img_inten = ri_inten.astype(np.uint8)
     ang45 = int(img_inten.shape[1]/8)
     ang_mid = int(img_inten.shape[1]/2) 
-    #img_inten = img_inten[:,ang_mid-ang45:ang_mid+ang45]
+    img_inten = img_inten[:,ang_mid-ang45*2:ang_mid+ang45*2]
     #cv2.imshow("intensity channel",img_inten)
     #cv2.waitKey(0)
     
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    img_range_intensity = np.vstack((img_inten,img_range))
+    img_range_intensity = np.vstack((img_range,img_inten))
 
     ####### ID_S1_EX1 END #######     
     
@@ -213,12 +213,6 @@ def bev_from_pcl(lidar_pcl, configs):
 
     #######
     ####### ID_S2_EX3 END #######       
-
-    # TODO remove after implementing all of the above steps
-    # lidar_pcl_cpy = []
-    # lidar_pcl_top = []
-    # height_map = []
-    # intensity_map = []
 
     # Compute density layer of the BEV map
     density_map = np.zeros((configs.bev_height + 1, configs.bev_width + 1))

@@ -225,6 +225,8 @@ def detect_objects(input_bev_maps, model, configs):
             detections = detections.cpu().numpy().astype(np.float32)
             detections = post_processing(detections, configs=configs)
             detections = detections[0][1]
+            for det in detections:
+                det[0] = 1
             
             #detections = detections[0]
             print("detections...",detections)
