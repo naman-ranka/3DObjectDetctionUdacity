@@ -71,8 +71,8 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                 det_corners = [(x1_det,y1_det),(x2_det,y2_det)]
                 ## step 4 : computer the center distance between label and detection bounding-box in x, y, and z
                 
-                print("corenrss1",label_corners)
-                print("corners2",det_corners)
+                # print("corenrss1",label_corners)
+                # print("corners2",det_corners)
                 x_cntr = box.center_x - det[1]
                 y_cntr = box.center_y - det[2]
                 z_cntr = box.center_z - det[3]
@@ -90,9 +90,9 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                 inter_area = width*length
                 det_area = (x2_det-x1_det)*(y2_det-y1_det)
                 label_area = (x2_label-x1_label)*(y2_label-y1_label)
-                print("areasss",inter_area,det_area,label_area)
+                # print("areasss",inter_area,det_area,label_area)
                 iou = inter_area/(det_area+label_area - inter_area)
-                print("iouuuuu",iou)
+                # print("iouuuuu",iou)
                 if iou>min_iou:
                     matches_lab_det.append([iou,x_cntr,y_cntr,z_cntr])
 
@@ -152,7 +152,7 @@ def compute_performance_stats(det_performance_all):
     print('student task ID_S4_EX3')
 
     ## step 1 : extract the total number of positives, true positives, false negatives and false positives
-    print("posss",pos_negs)
+    #print("posss",pos_negs)
     all_positives = sum([row[0] for row in pos_negs])
     true_positives = sum([row[1] for row in pos_negs])
     false_negatives = sum([row[2] for row in pos_negs])

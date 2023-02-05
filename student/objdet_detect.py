@@ -43,7 +43,7 @@ def load_configs_model(model_name='darknet', configs=None):
     # get parent directory of this file to enable relative paths
     curr_path = os.path.dirname(os.path.realpath(__file__))
     parent_path = configs.model_path = os.path.abspath(os.path.join(curr_path, os.pardir))    
-    
+    configs.min_iou = 0.5
     # set parameters according to model type
     if model_name == "darknet":
         configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'darknet')
@@ -229,7 +229,7 @@ def detect_objects(input_bev_maps, model, configs):
                 det[0] = 1
             
             #detections = detections[0]
-            print("detections...",detections)
+            #print("detections...",detections)
 
 
             #######
@@ -244,7 +244,7 @@ def detect_objects(input_bev_maps, model, configs):
     objects = [] 
 
     ## step 1 : check whether there are any detections
-    print("no of detections",len(detections))
+    # print("no of detections",len(detections))
     if len(detections)>0:
 
 
@@ -258,7 +258,7 @@ def detect_objects(input_bev_maps, model, configs):
             det[5] = _w*configs.lim_y[1]*2/configs.bev_width
             det[6] = _l*configs.lim_x[1]/configs.bev_height
             det[7] = -_yaw
-            print("det....",det)
+            # print("det....",det)
             objects.append(det)
 
     ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
