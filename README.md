@@ -5,7 +5,7 @@ This is the project for the second course in the  [Udacity Self-Driving Car Engi
 In this project, you'll fuse measurements from LiDAR and camera and track vehicles over time. You will be using real-world data from the Waymo Open Dataset, detect objects in 3D point clouds and apply an extended Kalman filter for sensor fusion and tracking.
 
 
-![this is a image](/darknet_sequence_1_anim.gif)
+![this is a image](/img/darknet_sequence_1_anim.gif)
 
 The project consists of two major parts: 
 1. **Object detection**: In this part, a deep-learning approach is used to detect vehicles in LiDAR data based on a birds-eye view perspective of the 3D point-cloud. Also, a series of performance measures is used to evaluate the performance of the detection approach. 
@@ -141,7 +141,7 @@ exec_visualization = ['show_range_image'] # options are 'show_range_image', 'sho
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization,)#'pcl_from_rangeimage', 'load_image'
 vis_pause_time = 0 
 ```
-![This is a image](/range_img.jpeg)
+![This is a image](/img/range_img.jpeg)
 
 
 ### Task1:Visualize lidar point-cloud 
@@ -188,10 +188,14 @@ show_only_frames = [0, 1]
 ```
 
 **Sensor coordinates to BEV-map coordinates**
+![This is a image](/img/bev_from_pcl1.png)
 
 **Intensity layer of the BEV map**
+![This is a image](/img/bev_range.png)
 
 **Height layer of the BEV map**
+
+![This is a image](/img/bev_height_intensity.png)
 
 
 
@@ -212,6 +216,12 @@ data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_cam
 show_only_frames = [50, 51]
 ```
 
+![This is a image](/img/task3.png)
+
+
+**Animation**
+![This is a image](/img/darknet_sequence_3_anim.gif)
+
 ### Task 4: Performance Evaluation for Object Detection
 
 **Task Prepreation**
@@ -230,7 +240,7 @@ exec_visualization = ['show_objects_in_bev_labels_in_camera','show_detection_per
 ```
 
 
-
+![This is a image](/img/ODpefomance.png)
 
 
 
