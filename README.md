@@ -1,22 +1,15 @@
 
-# SDCND : Sensor Fusion and Tracking
+# SDCND : 3D Object Detection Project
 This is the project for the second course in the  [Udacity Self-Driving Car Engineer Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213) : Sensor Fusion and Tracking. 
 
 In this project, you'll fuse measurements from LiDAR and camera and track vehicles over time. You will be using real-world data from the Waymo Open Dataset, detect objects in 3D point clouds and apply an extended Kalman filter for sensor fusion and tracking.
 
-<img src="img/img_title_1.jpeg"/>
 
 ![this is a image](/darknet_sequence_1_anim.gif)
 
 The project consists of two major parts: 
 1. **Object detection**: In this part, a deep-learning approach is used to detect vehicles in LiDAR data based on a birds-eye view perspective of the 3D point-cloud. Also, a series of performance measures is used to evaluate the performance of the detection approach. 
-2. **Object tracking** : In this part, an extended Kalman filter is used to track vehicles over time, based on the lidar detections fused with camera detections. Data association and track management are implemented as well.
 
-The following diagram contains an outline of the data flow and of the individual steps that make up the algorithm. 
-
-<img src="img/img_title_2_new.png"/>
-
-Also, the project code contains various tasks, which are detailed step-by-step in the code. More information on the algorithm and on the tasks can be found in the Udacity classroom. 
 
 ## Project File Structure
 
@@ -67,6 +60,10 @@ Also, the project code contains various tasks, which are detailed step-by-step i
 ### Cloning the Project
 In order to create a local copy of the project, please click on "Code" and then "Download ZIP". Alternatively, you may of-course use GitHub Desktop or Git Bash for this purpose. 
 
+```
+git clone https://github.com/naman-ranka/nd013-c2-fusion-starter-solution.git
+```
+
 ### Python
 The project has been written using Python 3.7. Please make sure that your local installation is equal or above this version. 
 
@@ -74,8 +71,10 @@ The project has been written using Python 3.7. Please make sure that your local 
 All dependencies required for the project have been listed in the file `requirements.txt`. You may either install them one-by-one using pip or you can use the following command to install them all at once: 
 `pip3 install -r requirements.txt` 
 
-### Waymo Open Dataset Reader
-The Waymo Open Dataset Reader is a very convenient toolbox that allows you to access sequences from the Waymo Open Dataset without the need of installing all of the heavy-weight dependencies that come along with the official toolbox. The installation instructions can be found in `tools/waymo_reader/README.md`. 
+```
+pip install requirements.txt
+```
+
 
 ### Waymo Open Dataset Files
 This project makes use of three different sequences to illustrate the concepts of object detection and tracking. These are: 
@@ -120,15 +119,119 @@ In case you do not include a specific step into the list, pre-computed binary fi
   - `show_detection_performance` displays the performance evaluation based on all detected 
   - `make_tracking_movie` renders an output movie of the object tracking results
 
-Even without solving any of the tasks, the project code can be executed. 
 
-The final project uses pre-computed lidar detections in order for all students to have the same input data. If you use the workspace, the data is prepared there already. Otherwise, [download the pre-computed lidar detections](https://drive.google.com/drive/folders/1IkqFGYTF6Fh_d8J3UjQOSNJ2V42UDZpO?usp=sharing) (~1 GB), unzip them and put them in the folder `results`.
 
-## External Dependencies
-Parts of this project are based on the following repositories: 
-- [Simple Waymo Open Dataset Reader](https://github.com/gdlg/simple-waymo-open-dataset-reader)
-- [Super Fast and Accurate 3D Object Detection based on 3D LiDAR Point Clouds](https://github.com/maudzung/SFA3D)
-- [Complex-YOLO: Real-time 3D Object Detection on Point Clouds](https://github.com/maudzung/Complex-YOLOv4-Pytorch)
+## Solution:
+
+### Task1:Lidar Point-Cloud from Range Image
+
+**Task Prepreation**
+
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+show_only_frames = [0, 1] # show only frames in interval for debugging
+```
+
+```
+exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = [] # options are 'perform_tracking'
+exec_visualization = ['show_range_image'] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization,)#'pcl_from_rangeimage', 'load_image'
+vis_pause_time = 0 
+```
+![This is a image](/range_img.jpeg)
+
+
+### Task1:Visualize lidar point-cloud 
+
+**Task Prepreation**
+
+```
+# data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
+data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+show_only_frames = [0, 100] # show only frames in interval for debugging
+```
+
+```
+exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = [] # options are 'perform_tracking'
+exec_visualization = ['show_pcl'] 
+```
+
+Features Examined from dataset:
+- Rear view mirror
+- Pattern of windshield and front bumper
+- Tyres
+- Number plate
+- Rear bumper
+- 
+
+
+
+### Task 2: Birds-Eye View from Lidar PCL
+
+**Task Prepreation**
+```
+exec_detection = ['bev_from_pcl'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = ['pcl_from_rangeimage'] # options are 'perform_tracking'
+exec_visualization = []
+```
+
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+show_only_frames = [0, 1]
+```
+
+**Sensor coordinates to BEV-map coordinates**
+
+**Intensity layer of the BEV map**
+
+**Height layer of the BEV map**
+
+
+
+### Task 3: Model-based Object Detection in BEV Image
+
+**Task Prepreation**
+
+```
+exec_detection = ['bev_from_pcl','detect_objects'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = ['pcl_from_rangeimage','load_image'] # options are 'perform_tracking'
+exec_visualization = ['show_objects_in_bev_labels_in_camera']
+```
+
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+show_only_frames = [50, 51]
+```
+
+### Task 4: Performance Evaluation for Object Detection
+
+**Task Prepreation**
+
+```
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+show_only_frames = [50, 150]
+```
+
+```
+exec_detection = ['bev_from_pcl','detect_objects','validate_object_labels', 'measure_detection_performance'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_tracking = ['pcl_from_rangeimage','load_image'] # options are 'perform_tracking'
+exec_visualization = ['show_objects_in_bev_labels_in_camera','show_detection_performance']
+```
+
+
+
+
 
 
 ## License
