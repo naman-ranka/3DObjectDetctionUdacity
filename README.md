@@ -128,19 +128,22 @@ In case you do not include a specific step into the list, pre-computed binary fi
 **Task Prepreation**
 
 ```
-data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
-# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
-# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
-show_only_frames = [0, 1] # show only frames in interval for debugging
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' 
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' 
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' 
+show_only_frames = [0, 1]
 ```
 
 ```
-exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = [] # options are 'perform_tracking'
-exec_visualization = ['show_range_image'] # options are 'show_range_image', 'show_bev', 'show_pcl', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
-exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization,)#'pcl_from_rangeimage', 'load_image'
+exec_detection = [] 
+exec_tracking = [] 
+exec_visualization = ['show_range_image'] 
+exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization,)
 vis_pause_time = 0 
 ```
+
+**Result**
+
 ![This is a image](/img/range_img.jpeg)
 
 
@@ -149,15 +152,15 @@ vis_pause_time = 0
 **Task Prepreation**
 
 ```
-# data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
-# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
-data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+# data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' 
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord'
+data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' 
 show_only_frames = [0, 100] # show only frames in interval for debugging
 ```
 
 ```
-exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = [] # options are 'perform_tracking'
+exec_detection = []
+exec_tracking = []
 exec_visualization = ['show_pcl'] 
 ```
 
@@ -175,8 +178,8 @@ Features Examined from dataset:
 
 **Task Prepreation**
 ```
-exec_detection = ['bev_from_pcl'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = ['pcl_from_rangeimage'] # options are 'perform_tracking'
+exec_detection = ['bev_from_pcl'] 
+exec_tracking = ['pcl_from_rangeimage']
 exec_visualization = []
 ```
 
@@ -186,6 +189,8 @@ data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_cam
 # data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
 show_only_frames = [0, 1]
 ```
+
+**Result**
 
 **Sensor coordinates to BEV-map coordinates**
 ![This is a image](/img/bev_from_pcl1.png)
@@ -204,22 +209,25 @@ show_only_frames = [0, 1]
 **Task Prepreation**
 
 ```
-exec_detection = ['bev_from_pcl','detect_objects'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = ['pcl_from_rangeimage','load_image'] # options are 'perform_tracking'
+exec_detection = ['bev_from_pcl','detect_objects'] 
+exec_tracking = ['pcl_from_rangeimage','load_image']
 exec_visualization = ['show_objects_in_bev_labels_in_camera']
 ```
 
 ```
-data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
-# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
-# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' 
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord'
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord'
 show_only_frames = [50, 51]
 ```
+
+**Result**
 
 ![This is a image](/img/task3.png)
 
 
 **Animation**
+
 ![This is a image](/img/darknet_sequence_3_anim.gif)
 
 ### Task 4: Performance Evaluation for Object Detection
@@ -227,17 +235,19 @@ show_only_frames = [50, 51]
 **Task Prepreation**
 
 ```
-data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
-# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
-# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
+data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' 
+# data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord'
+# data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord'
 show_only_frames = [50, 150]
 ```
 
 ```
-exec_detection = ['bev_from_pcl','detect_objects','validate_object_labels', 'measure_detection_performance'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
-exec_tracking = ['pcl_from_rangeimage','load_image'] # options are 'perform_tracking'
+exec_detection = ['bev_from_pcl','detect_objects','validate_object_labels', 'measure_detection_performance'] 
+exec_tracking = ['pcl_from_rangeimage','load_image'] 
 exec_visualization = ['show_objects_in_bev_labels_in_camera','show_detection_performance']
 ```
+
+**Result**
 
 
 ![This is a image](/img/ODpefomance.png)
