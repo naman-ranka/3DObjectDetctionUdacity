@@ -164,13 +164,12 @@ exec_tracking = []
 exec_visualization = ['show_pcl'] 
 ```
 
-Features Examined from dataset:
-- Rear view mirror
-- Pattern of windshield and front bumper
-- Tyres
-- Number plate
-- Rear bumper
-- 
+**Read the writeup [here](/writeup_pointcloud.pdf)**
+
+
+![This is a image](/img/visulaize.png)
+
+
 
 
 
